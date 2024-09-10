@@ -19,7 +19,7 @@ beforeAll( async() => {
   originalUsers =await usersCollection.find({}).toArray();
   await messageCollection.deleteMany({});
   await groupCollection.deleteMany({});
-  httpServer.listen(8080, () => {
+  httpServer.listen(8000, () => {
     console.log('Test server running on port 8080');
   });
 });
@@ -350,7 +350,7 @@ describe('Functional Testing for Group Creation API', () => {
   });
 
   
-  it('should adding another(User 4) Member into group when authenticated By Normal User(user 1)', async () => {
+  it(`should adding another(User 4) Member into group when authenticated By Normal  User(user 1) `, async () => {
     const res = await request(httpServer)
       .post('/add-member')
       .set('Authorization', `Bearer ${user1Token}`)
