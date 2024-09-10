@@ -1,6 +1,8 @@
 import bcrypt from 'bcryptjs';
 import UserModel from "../model/userModel.js";
 import jwt from 'jsonwebtoken';
+// logout tokens list
+const tokenBlacklist = new Set();
 
 const generateRandomId = async(role) => {
     try {
@@ -78,12 +80,30 @@ const Login = async (req, res, response) => {
         res.status(400).send({ status: "error", message: "Password Incorrect." });
     }
 }
+
+const logout = (req, res) => {
+    const authHeader = req.headers['authorization'];
+  
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.split(' ')[1];
+  
+      // Add the token to the blacklist
+      tokenBlacklist.add(token);
+  
+      res.status(200).send({ status: 'success', message: 'Logged out successfully.' });
+    } else {
+      res.status(400).send({ status: 'error', message: 'No token provided.' });
+    }
+  };
 // Authenticate Token Middleware
 const authenticateToken = async (req, res, role) => {
     const authHeader = req.headers['authorization'];
     if (authHeader && authHeader.startsWith('Bearer ')) {
         try {
             const token = authHeader.split(' ')[1];
+            if (tokenBlacklist.has(token)) {
+                return false; // logout list
+            }
             const decoded = jwt.verify(token, process.env.JWT_PRIVATE_KEY);
             const authenticatedUser = await UserModel.findByUserId(decoded._id);
 
@@ -112,7 +132,7 @@ const isAuthenticated = (role) => {
         } else if (authenticatedStatus === 3) {
             return res.status(401).send({ status: "error", message: "Authorization token is missing." });
         } else {
-            console.error("Authentication Error: ", authenticatedStatus); // Log unexpected error
+            console.log("Authentication Error: ", authenticatedStatus); // Log unexpected error
             return res.status(500).send({ status: "error", message: "Unexpected error occurred It may Token Incorrect  or Expired." });
         }
     };
@@ -144,5 +164,5 @@ const resetPassword = async (req, res) => {
 }
 
 export default {
-    generateRandomId, Registration, Login, resetPassword, isAuthenticatedAdmin, isAuthenticatedUser, isLoginAuthenticated
+    generateRandomId, Registration, Login,logout, resetPassword, isAuthenticatedAdmin, isAuthenticatedUser, isLoginAuthenticated
 }

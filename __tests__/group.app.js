@@ -242,7 +242,7 @@ describe('Functional Testing for Group Creation API', () => {
   });
 
   // Create a group using the Bearer token
-  let group_id1,group_id2;
+  let group_id1,group_id2, group_id3,group_id4;
   it('should create a group when authenticated By Normal User (user1)', async () => {
     const res = await request(httpServer)
       .post('/create-group')
@@ -271,7 +271,7 @@ describe('Functional Testing for Group Creation API', () => {
     expect(res.body.message).toBe('Group created successfully.');
     expect(res.body.data).toBeDefined(); // Ensure the group object is returned
 
-    group_id1 = (res.body.data)?._id;
+    group_id2 = (res.body.data)?._id;
   });
   it('should create a group when authenticated By Normal User (user1)', async () => {
     const res = await request(httpServer)
@@ -286,22 +286,7 @@ describe('Functional Testing for Group Creation API', () => {
     expect(res.body.message).toBe('Group created successfully.');
     expect(res.body.data).toBeDefined(); // Ensure the group object is returned
 
-    group_id1 = (res.body.data)?._id;
-  });
-  it('should create a group when authenticated By Normal User (user1)', async () => {
-    const res = await request(httpServer)
-      .post('/create-group')
-      .set('Authorization', `Bearer ${user1Token}`)
-      .send({
-        groupName: "cricket 2"
-      });
-
-    expect(res.statusCode).toEqual(200);
-    expect(res.body.status).toBe('success');
-    expect(res.body.message).toBe('Group created successfully.');
-    expect(res.body.data).toBeDefined(); // Ensure the group object is returned
-
-    group_id1 = (res.body.data)?._id;
+    group_id3 = (res.body.data)?._id;
   });
   it('should create a group when authenticated By Normal User (user1)', async () => {
     const res = await request(httpServer)
@@ -316,11 +301,29 @@ describe('Functional Testing for Group Creation API', () => {
     expect(res.body.message).toBe('Group created successfully.');
     expect(res.body.data).toBeDefined(); // Ensure the group object is returned
 
-    group_id1 = (res.body.data)?._id;
+    group_id4 = (res.body.data)?._id;
+  });
+
+  it('should able SEARCH group by Group Name when authenticated By Normal User (user1)', async () => {
+    const res = await request(httpServer)
+      .get('/get-all-groups/cricket')
+      .set('Authorization', `Bearer ${user1Token}`)
+      .send({
+      });
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.status).toBe('success');
+    expect(res.body.message).toBe('fetched');
+    expect(res.body.data).toBeDefined(); // Ensure the group object is returned
   });
 
   // Step 4: Test group creation without token (should fail)
-  it('should not create a group without token By Normal User(user1)', async () => {
+  it(`should not create a group without token By Normal User(user1)
+    
+    
+    
+    
+    `, async () => {
     const res = await request(httpServer)
       .post('/create-group')
       .send({
@@ -574,6 +577,43 @@ describe('Functional Testing for Group Creation API', () => {
       .send({  });
 
     expect(res.statusCode).toEqual(404);
+    expect(res.body.status).toBe('error');
+    expect(res.body.message).toBeDefined();
+
+  });
+
+  it('should logout when valid Token By Normal User(Group Admin)(user 1)', async () => {
+    const res = await request(httpServer)
+      .post(`/logout`)
+      .set('Authorization', `Bearer ${user1Token}`)
+      .send({  });
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.status).toBe('success');
+    expect(res.body.message).toBeDefined();
+
+  });
+
+  it('should logout when valid Token By Normal User(user 2)', async () => {
+    const res = await request(httpServer)
+      .post(`/logout`)
+      .set('Authorization', `Bearer ${user2Token}`)
+      .send({  });
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.status).toBe('success');
+    expect(res.body.message).toBeDefined();
+
+  });
+
+  it('should not Access all protected end points when Logout user Token or  Invalid Token By Normal User(user 1 Token using) Here trying access Group 2 details', async () => {
+    const res = await request(httpServer)
+    .get('/get-group/'+group_id2)
+    .set('Authorization', `Bearer ${user1Token}`)
+    .send({
+    });
+
+    expect(res.statusCode).toEqual(500);
     expect(res.body.status).toBe('error');
     expect(res.body.message).toBeDefined();
 

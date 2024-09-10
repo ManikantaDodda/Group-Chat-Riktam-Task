@@ -41,6 +41,12 @@ const getAllGroupsByUserId = async(user_id) => {
     return groups;
 }
 
+const searchGroupsByName = async(user_id, group_name) => {
+    const groups = await GroupModel.find({
+    group_name: { $regex: group_name, $options: 'i' },members : {$in: user_id} });
+    return groups;
+}
+
 // Function to get a group by ID with user_id and members populated
 const getGroupDetailsById = async (_id) => {
     const group = await GroupModel.findById(_id)
@@ -138,5 +144,5 @@ const isValidGroupMember = async (_id, memberId) => {
     }
 };
 
-export {getGroupDetailsById, getGroupById,getAllGroupsByUserId, createNewGroup, addMemberIntoGroup, isValidGroupMember, deleteGroup,removeMemberFromGroup, updateGroupName , nonExistingGroupMembers};
+export {getGroupDetailsById, getGroupById,getAllGroupsByUserId, searchGroupsByName, createNewGroup, addMemberIntoGroup, isValidGroupMember, deleteGroup,removeMemberFromGroup, updateGroupName , nonExistingGroupMembers};
 

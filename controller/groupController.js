@@ -1,4 +1,4 @@
-import { createNewGroup,updateGroupName, getGroupById,getAllGroupsByUserId, getGroupDetailsById ,
+import { createNewGroup,updateGroupName, getGroupById,getAllGroupsByUserId,searchGroupsByName, getGroupDetailsById ,
  addMemberIntoGroup, isValidGroupMember, deleteGroup, removeMemberFromGroup, nonExistingGroupMembers} from "../model/GroupModel.js"
 
 const createNewGroupController = async(req, res) =>{
@@ -47,12 +47,21 @@ const getCreatedGroupController = async(req, res) => {
 const getAllCreatedGroupController = async(req, res) => {
     try{
         let user_id = req.user._id;
+        let group_name = req.params.group_name;
         if(!user_id)
         {
             res.status(400).send({ status: "error", message: "Please Provide valid data." });
             return;
         }
-        let groupData = await getAllGroupsByUserId(user_id);
+        let groupData = [];
+        if(group_name && group_name !=null && group_name !=undefined && group_name !='')
+        {
+            groupData = await searchGroupsByName(user_id, group_name);
+        }
+        else {
+            groupData = await getAllGroupsByUserId(user_id);
+        }
+         
         if(groupData.length) {
             res.send({status : "success", message : "fetched", data : groupData });
         }  else{
